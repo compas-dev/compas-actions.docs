@@ -10,14 +10,14 @@ inputs:
     description: 'whether to build documentation to a subfolder according to the commit type'
     required: true
     default: 'false'
-  update-doc-versions:
-    description: 'whether to update the list of doc versions'
-    required: true
-    default: 'false'
-  doc-versions-path:
-    description: 'the path of doc versions list'
-    required: true
-    default: 'doc_versions.txt'
+
+outputs:
+  commit_type:
+    description: "The type of this commit: main, pull or tag"
+    value: ${{ steps.docs.outputs.commit_type }}
+  current_patch:
+    description: "Random number"
+    value: ${{ steps.docs.outputs.current_patch }}
 
 runs:
   using: "composite"
@@ -33,23 +33,28 @@ runs:
       run: invoke docs
 
     - shell: bash
+      id : docs
       run: |
+        # Get branch/tag/latest name from git
+        GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}|(pull/[0-9]+)|heads/main"
+        if [[ $GITHUB_REF =~ $GITHUB_REF_REGEX ]]; then
+            if [[ $BASH_REMATCH = pull* ]]; then
+                echo This is a pull request
+                FOLDER_NAME=pull_${BASH_REMATCH##*/}
+                echo "::set-output name=commit_type::pull"
+            elif [[ $BASH_REMATCH = tags/* ]]; then
+                echo This is a version tag
+                FOLDER_NAME=${BASH_REMATCH##*/v}
+                echo "::set-output name=commit_type::tag"
+                echo "::set-output name=current_patch::$FOLDER_NAME"
+            else
+                echo This is a commit to main branch
+                FOLDER_NAME=latest
+                echo "::set-output name=commit_type::main"
+            fi;
+        fi;
+
         if [[ ${{ inputs.build-to-subfolder }} == "true" ]]; then
-          # Get branch/tag/latest name from git
-          GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}|(pull/[0-9]+)|heads/main"
-          if [[ $GITHUB_REF =~ $GITHUB_REF_REGEX ]]; then
-              if [[ $BASH_REMATCH = pull* ]]; then
-                  echo This is a pull request
-                  FOLDER_NAME=pull_${BASH_REMATCH##*/}
-              elif [[ $BASH_REMATCH = tags/* ]]; then
-                  echo This is a version tag
-                  FOLDER_NAME=${BASH_REMATCH##*/v}
-                  echo "::set-output name=current_patch::$FOLDER_NAME"
-              else
-                  echo This is a commit to main branch
-                  FOLDER_NAME=latest
-              fi;
-          fi;
           mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
           echo "Docs is built at ${{ inputs.dest }}/$FOLDER_NAME/"
         else
