@@ -34,7 +34,7 @@ runs:
 
     - shell: bash
       run: |
-        if [[ ${{ inputs.build-to-subfolder }} == "true" ]] then
+        if [[ ${{ inputs.build-to-subfolder }} == "true" ]]; then
           # Get branch/tag/latest name from git
           GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}|(pull/[0-9]+)|heads/main"
           if [[ $GITHUB_REF =~ $GITHUB_REF_REGEX ]]; then
