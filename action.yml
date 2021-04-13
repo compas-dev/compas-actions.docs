@@ -6,7 +6,7 @@ inputs:
     description: 'destination folder of built docs'
     required: true
     default: 'deploy'
-  build-to-subfolder:
+  build_to_subfolder:
     description: 'whether to build documentation to a subfolder according to the commit type'
     required: true
     default: 'false'
@@ -19,7 +19,7 @@ outputs:
     description: "The version number if the commit is tag"
     value: ${{ steps.docs.outputs.current_patch }}
   subfolder:
-    description: "The subfolder name where the docs are built to (if build-to-subfolder is set to true)"
+    description: "The subfolder name where the docs are built to (if build_to_subfolder is set to true)"
     value: ${{ steps.docs.outputs.subfolder }}
 
 runs:
@@ -57,7 +57,7 @@ runs:
             fi;
         fi;
 
-        if [[ ${{ inputs.build-to-subfolder }} == "true" ]]; then
+        if [[ ${{ inputs.build_to_subfolder }} == "true" ]]; then
           mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
           echo "::set-output name=subfolder::$FOLDER_NAME"
           echo "Docs is built at ${{ inputs.dest }}/$FOLDER_NAME/"
