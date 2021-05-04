@@ -15,9 +15,9 @@ outputs:
   commit_type:
     description: "The type of this commit: main, pull or tag"
     value: ${{ steps.docs.outputs.commit_type }}
-  current_patch:
+  current_version:
     description: "The version number if the commit is tag"
-    value: ${{ steps.docs.outputs.current_patch }}
+    value: ${{ steps.docs.outputs.current_version }}
   subfolder:
     description: "The subfolder name where the docs are built to (if build_to_subfolder is set to true)"
     value: ${{ steps.docs.outputs.subfolder }}
@@ -49,7 +49,7 @@ runs:
                 echo This is a version tag
                 FOLDER_NAME=${BASH_REMATCH##*/v}
                 echo "::set-output name=commit_type::tag"
-                echo "::set-output name=current_patch::$FOLDER_NAME"
+                echo "::set-output name=current_version::$FOLDER_NAME"
             else
                 echo This is a commit to main branch
                 FOLDER_NAME=latest
