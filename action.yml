@@ -14,6 +14,10 @@ inputs:
     description: 'whether install dependencies in this action'
     required: true
     default: 'true'
+  build_docs:
+    description: 'whether to build docs in this action. (sometimes docs has to be built externally for example under a conda env)'
+    required: true
+    default: 'true'
 
 outputs:
   commit_type:
@@ -39,7 +43,10 @@ runs:
         fi
 
     - shell: bash
-      run: invoke docs
+      run: |
+        if [[ ${{ inputs.build_docs }} == "true" ]]; then
+          invoke docs
+        fi
 
     - shell: bash
       id : docs
