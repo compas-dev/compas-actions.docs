@@ -78,3 +78,18 @@ runs:
           mkdir -p ${{ inputs.dest }} && mv -T dist/docs ${{ inputs.dest }}
           echo "Docs is built at ${{ inputs.dest }}"
         fi;
+
+    - shell: bash
+      run: |
+        echo check index.html and .nojekyll
+        cd ${{ inputs.dest }}
+        if [[ ! -f ".nojekyll" ]]; then
+          echo creating .nojekyll
+          > .nojekyll
+        fi
+        if [[ ! -f "index.html" ]]; then
+          echo creating index.html
+          full_repo=${{ github.repository }}
+          repo=${full_repo#*/}
+          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/latest/index.html">' > index.html
+        fi
