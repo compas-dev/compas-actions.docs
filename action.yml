@@ -65,7 +65,7 @@ runs:
                 echo "::set-output name=current_version::$FOLDER_NAME"
             else
                 echo This is a commit to main branch
-                FOLDER_NAME=latest
+                FOLDER_NAME=dev
                 echo "::set-output name=commit_type::main"
             fi;
         fi;
@@ -91,5 +91,5 @@ runs:
           echo creating index.html
           full_repo=${{ github.repository }}
           repo=${full_repo#*/}
-          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/latest/index.html">' > index.html
+          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/dev/index.html">' > index.html
         fi
