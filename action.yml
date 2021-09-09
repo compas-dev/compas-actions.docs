@@ -87,9 +87,16 @@ runs:
           echo creating .nojekyll
           > .nojekyll
         fi
+
+        full_repo=${{ github.repository }}
+        repo=${full_repo#*/}
+
         if [[ ! -f "index.html" ]]; then
           echo creating index.html
-          full_repo=${{ github.repository }}
-          repo=${full_repo#*/}
-          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/dev/index.html">' > index.html
+          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/dev/">' > index.html
+        fi
+
+        if [[ ${{ steps.docs.outputs.commit_type }} == "tag" ]]; then
+          echo update index.html to point at ${{ steps.docs.outputs.current_version }}
+          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/${{ steps.docs.outputs.current_version }}/">' > index.html
         fi
