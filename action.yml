@@ -65,7 +65,7 @@ runs:
                 echo "::set-output name=current_version::$FOLDER_NAME"
             else
                 echo This is a commit to main branch
-                FOLDER_NAME=dev
+                FOLDER_NAME=latest
                 echo "::set-output name=commit_type::main"
             fi;
         fi;
@@ -93,7 +93,7 @@ runs:
 
         if [[ ! -f "index.html" ]]; then
           echo creating index.html
-          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/dev/">' > index.html
+          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/latest/">' > index.html
         fi
 
         if [[ ${{ steps.docs.outputs.commit_type }} == "tag" ]]; then
