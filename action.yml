@@ -18,6 +18,10 @@ inputs:
     description: 'whether to build docs in this action. (sometimes docs has to be built externally for example under a conda env)'
     required: true
     default: 'true'
+  test_docs:
+    description: 'whether to test docstrings in this action.'
+    required: false
+    default: 'false'
 
 outputs:
   commit_type:
@@ -46,6 +50,10 @@ runs:
       run: |
         if [[ ${{ inputs.build_docs }} == "true" ]]; then
           invoke docs
+        fi
+
+        if [[ ${{ inputs.test_docs }} == "true" ]]; then
+          invoke testdocs
         fi
 
     - shell: bash
