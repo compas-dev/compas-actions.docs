@@ -48,12 +48,12 @@ runs:
 
     - shell: bash
       run: |
-        if [[ ${{ inputs.build_docs }} == "true" ]]; then
-          invoke docs
-        fi
-
         if [[ ${{ inputs.test_docs }} == "true" ]]; then
           invoke testdocs
+        fi
+
+        if [[ ${{ inputs.build_docs }} == "true" ]]; then
+          invoke docs
         fi
 
     - shell: bash
