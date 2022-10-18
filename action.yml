@@ -65,23 +65,23 @@ runs:
             if [[ $BASH_REMATCH = pull* ]]; then
                 echo This is a pull request
                 FOLDER_NAME=pull_${BASH_REMATCH##*/}
-                echo "commit_type=pull" >> $GITHUB_ENV
+                echo "commit_type=pull" >> $GITHUB_OUTPUT
             elif [[ $BASH_REMATCH = tags/* ]]; then
                 echo This is a version tag
                 FOLDER_NAME=${BASH_REMATCH##*/v}
-                echo "commit_type=tag" >> $GITHUB_ENV
-                echo "current_version=$FOLDER_NAME" >> $GITHUB_ENV
+                echo "commit_type=tag" >> $GITHUB_OUTPUT
+                echo "current_version=$FOLDER_NAME" >> $GITHUB_OUTPUT
             else
                 echo This is a commit to main branch
                 FOLDER_NAME=latest
-                echo "commit_type=main" >> $GITHUB_ENV
+                echo "commit_type=main" >> $GITHUB_OUTPUT
 
             fi;
         fi;
 
         if [[ ${{ inputs.build_to_subfolder }} == "true" ]]; then
           mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
-          echo "subfolder=$FOLDER_NAME" >> $GITHUB_ENV
+          echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
           echo "Docs is built at ${{ inputs.dest }}/$FOLDER_NAME/"
         else
           mkdir -p ${{ inputs.dest }} && mv -T dist/docs ${{ inputs.dest }}
