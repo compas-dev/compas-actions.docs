@@ -40,6 +40,9 @@ runs:
     - shell: bash
       run: |
         if [[ ${{ inputs.install_dependencies }} == "true" ]]; then
+          if [[ ${{ runner.os }} == "Linux" ]]; then
+            sudo apt-get install graphviz
+          fi
           sudo apt-get install graphviz
           python -m pip install --upgrade pip
           python -m pip install cython --install-option="--no-cython-compile"
