@@ -4,24 +4,16 @@ description: 'Build docs for COMPAS or its plugins'
 inputs:
   dest:
     description: 'destination folder of built docs'
-    required: true
+    required: false
     default: 'deploy'
   build_to_subfolder:
     description: 'whether to build documentation to a subfolder according to the commit type'
-    required: true
-    default: 'false'
-  install_dependencies:
-    description: 'whether install dependencies in this action'
-    required: true
-    default: 'true'
-  build_docs:
-    description: 'whether to build docs in this action. (sometimes docs has to be built externally for example under a conda env)'
-    required: true
+    required: false
     default: 'true'
   test_docs:
     description: 'whether to test docstrings in this action.'
     required: false
-    default: 'false'
+    default: 'true'
 
 outputs:
   commit_type:
@@ -37,27 +29,30 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v3
+
+    # Install graphvis if using linux
     - shell: bash
       run: |
-        if [[ ${{ inputs.install_dependencies }} == "true" ]]; then
-          if [[ ${{ runner.os }} == "Linux" ]]; then
-            sudo apt-get install graphviz
-          fi
-          python -m pip install --upgrade pip
-          python -m pip install cython --install-option="--no-cython-compile"
-          python -m pip install --no-cache-dir -r requirements-dev.txt
+        if [[ ${{ runner.os }} == "Linux" ]]; then
+          sudo apt-get install graphviz
         fi
 
+    # Build package
+    - uses: compas-dev/compas-actions.build@v2
+      with:
+        test: false
+
+    # Test and generate docs
     - shell: bash
       run: |
         if [[ ${{ inputs.test_docs }} == "true" ]]; then
           invoke testdocs
         fi
 
-        if [[ ${{ inputs.build_docs }} == "true" ]]; then
-          invoke docs
-        fi
+        invoke docs
 
+    # Detect commit type and docs to corresponding folder
     - shell: bash
       id : docs
       run: |
@@ -90,6 +85,7 @@ runs:
           echo "Docs is built at ${{ inputs.dest }}"
         fi;
 
+    # Check index.html and .nojekyll
     - shell: bash
       run: |
         echo check index.html and .nojekyll
@@ -111,3 +107,20 @@ runs:
           echo update index.html to point at ${{ steps.docs.outputs.current_version }}
           echo '<meta http-equiv="refresh" content="0; url=/'$repo'/${{ steps.docs.outputs.current_version }}/">' > index.html
         fi
+
+    # Deploy docs to ghpage
+    - name: Deploy docs
+      if: success() && steps.docs.outputs.commit_type != 'pull'
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: deploy
+        keep_history: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+    # Update docs version list
+    - uses: compas-dev/compas-actions.docversions@v2
+      if: success() && steps.docs.outputs.commit_type == 'tag'
+      with:
+        current_version: ${{ steps.docs.outputs.current_version }}
