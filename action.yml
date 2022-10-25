@@ -14,7 +14,7 @@ inputs:
     description: 'whether to test docstrings in this action.'
     required: false
     default: 'true'
-  token:
+  github_token:
     description: 'the github token for publishing docs'
     required: true
     default: ''
@@ -121,11 +121,11 @@ runs:
         build_dir: deploy
         keep_history: true
       env:
-        GITHUB_TOKEN: ${{ inputs.token }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       
     # Update docs version list
     - uses: compas-dev/compas-actions.docversions@v2
       if: success() && steps.docs.outputs.commit_type == 'tag'
       with:
         current_version: ${{ steps.docs.outputs.current_version }}
-        token: ${{ inputs.token }}
+        github_token: ${{ inputs.github_token }}
