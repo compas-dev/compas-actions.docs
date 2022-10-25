@@ -58,7 +58,7 @@ runs:
         python: ${{ inputs.python }}
 
     # Test and generate docs
-      shell: bash -l {0}
+    - shell: bash -l {0}
       run: |
         if [[ ${{ inputs.test_docs }} == "true" ]]; then
           invoke testdocs
