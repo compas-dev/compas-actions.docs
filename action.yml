@@ -18,6 +18,14 @@ inputs:
     description: 'the github token for publishing docs'
     required: true
     default: ''
+  python:
+    description: "which python version to build docs with"
+    required: false
+    default: "3.10"
+  use_conda:
+    description: "whether to build docs with conda"
+    required: false
+    default: "false"
 
 outputs:
   commit_type:
@@ -46,6 +54,8 @@ runs:
     - uses: compas-dev/compas-actions.build@v2
       with:
         test: false
+        use_conda: ${{ inputs.use_conda }}
+        python: ${{ inputs.python }}
 
     # Test and generate docs
     - shell: bash
