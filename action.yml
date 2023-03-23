@@ -43,11 +43,12 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
-    # Install graphvis if using linux
+    # Install graphvis and set env for qt if using linux
     - shell: bash -l {0}
       run: |
         if [[ ${{ runner.os }} == "Linux" ]]; then
           sudo apt-get install graphviz
+          echo "MPLBACKEND=agg" >> $GITHUB_ENV
         fi
 
     # Build package
