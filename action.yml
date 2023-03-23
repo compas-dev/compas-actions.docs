@@ -47,8 +47,7 @@ runs:
     - shell: bash -l {0}
       run: |
         if [[ ${{ runner.os }} == "Linux" ]]; then
-          sudo apt-get install graphviz
-          echo "MPLBACKEND=agg" >> $GITHUB_ENV
+          sudo apt-get install graphviz libqt5gui5 libqt5widgets5
         fi
 
     # Build package
