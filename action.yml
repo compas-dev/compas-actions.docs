@@ -30,6 +30,11 @@ inputs:
     description: "allow using virtual display on linux when matplotlab is imported"
     required: false
     default: "false"
+  use_latex:
+    description: "install dependencies for LaTex"
+    required: false
+    default: "false"
+
 
 outputs:
   commit_type:
@@ -53,13 +58,21 @@ runs:
         if [[ ${{ runner.os }} == "Linux" ]]; then
           sudo apt-get install graphviz
         fi
-    
+
+    # Enable virtual display
     - shell: bash -l {0}
       run: |
         if [[ ${{ inputs.use_virtual_display }} == "true" ]]; then
           sudo apt-get install libqt5gui5 libqt5widgets5 qt5-default xvfb
           Xvfb :99 -screen 0 1024x768x24 &
           echo "DISPLAY=:99.0" >> $GITHUB_ENV
+        fi
+
+    # Install LaTex
+    - shell: bash -l {0}
+      run: |
+        if [[ ${{ inputs.use_latex }} == "true" ]]; then
+          sudo apt-get install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra dvipng
         fi
 
     # Build package
