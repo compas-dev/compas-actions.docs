@@ -26,6 +26,10 @@ inputs:
     description: "whether to build docs with conda"
     required: false
     default: "false"
+  use_virtual_display:
+    description: "allow using virtual display on linux when matplotlab is imported"
+    required: false
+    default: "false"
 
 outputs:
   commit_type:
@@ -43,12 +47,19 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
-    # Install graphvis and set env for qt if using linux
+    # Install graphvis
     - shell: bash -l {0}
       run: |
         if [[ ${{ runner.os }} == "Linux" ]]; then
           sudo apt-get install graphviz
-          echo "MPLBACKEND=agg" >> $GITHUB_ENV
+        fi
+    
+    - shell: bash -l {0}
+      run: |
+        if [[ ${{ inputs.use_virtual_display }} == "true" ]]; then
+          sudo apt-get install libqt5gui5 libqt5widgets5 qt5-default xvfb
+          Xvfb :99 -screen 0 1024x768x24 &
+          echo "DISPLAY=:99.0" >> $GITHUB_ENV
         fi
 
     # Build package
