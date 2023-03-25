@@ -96,7 +96,7 @@ runs:
       id : docs
       run: |
         # Get branch/tag/latest name from git
-        GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}(rc[0-9]{1,2})?|(pull/[0-9]+)|heads/main"
+        GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}(rc[0-9]{1,2})?|(pull/[0-9]+)|heads/main|heads/COMPAS-1\.x\.LTS"
         if [[ $GITHUB_REF =~ $GITHUB_REF_REGEX ]]; then
             if [[ $BASH_REMATCH = pull* ]]; then
                 echo This is a pull request
@@ -107,6 +107,10 @@ runs:
                 FOLDER_NAME=${BASH_REMATCH##*/v}
                 echo "commit_type=tag" >> $GITHUB_OUTPUT
                 echo "current_version=$FOLDER_NAME" >> $GITHUB_OUTPUT
+            elif [[ $BASH_REMATCH = heads/COMPAS-1.x.LTS ]]; then
+                echo This is a commit to the COMPAS-1.x.LTS branch
+                FOLDER_NAME=1.x.LTS
+                echo "commit_type=COMPAS-1.x.LTS" >> $GITHUB_OUTPUT
             else
                 echo This is a commit to main branch
                 FOLDER_NAME=latest
