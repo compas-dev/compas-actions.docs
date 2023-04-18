@@ -76,9 +76,9 @@ runs:
         fi
 
     # Build package
-    - uses: compas-dev/compas-actions.build@v2
+    - uses: compas-dev/compas-actions.build@v3
       with:
-        test: false
+        invoke_test: false
         use_conda: ${{ inputs.use_conda }}
         python: ${{ inputs.python }}
 
