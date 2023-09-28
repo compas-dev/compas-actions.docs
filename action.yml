@@ -146,9 +146,10 @@ runs:
           echo '<meta http-equiv="refresh" content="0; url=/'$repo'/latest/">' > index.html
         fi
 
-        if [[ ${{ steps.docs.outputs.commit_type }} == "tag" ]]; then
-          echo update index.html to point at ${{ steps.docs.outputs.current_version }}
-          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/${{ steps.docs.outputs.current_version }}/">' > index.html
+        if [[ ${{ steps.docs.outputs.commit_type }} == "tag" ]] && 
+          [[ ! "${{ steps.docs.outputs.current_version }}" =~ [0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)* ]]; then
+            echo update index.html to point at ${{ steps.docs.outputs.current_version }}
+            echo '<meta http-equiv="refresh" content="0; url=/'$repo'/${{ steps.docs.outputs.current_version }}/">' > index.html
         fi
 
     # Deploy docs to ghpage
