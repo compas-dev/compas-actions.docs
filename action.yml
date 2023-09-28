@@ -96,7 +96,7 @@ runs:
       id : docs
       run: |
         # Get branch/tag/latest name from git
-        GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}(rc[0-9]{1,2})?|(pull/[0-9]+)|heads/main|heads/COMPAS-1\.x\.LTS"
+        GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(rc[0-9]{1,2})?|(pull/[0-9]+)|heads/main|heads/COMPAS-1\.x\.LTS"
         if [[ $GITHUB_REF =~ $GITHUB_REF_REGEX ]]; then
             if [[ $BASH_REMATCH = pull* ]]; then
                 echo This is a pull request
