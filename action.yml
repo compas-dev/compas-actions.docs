@@ -2,22 +2,16 @@ name: 'compas-actions.docs'
 description: 'Build docs for COMPAS or its plugins'
 
 inputs:
-  dest:
-    description: 'destination folder of built docs'
-    required: false
-    default: 'deploy'
-  build_to_subfolder:
-    description: 'whether to build documentation to a subfolder according to the commit type'
-    required: false
-    default: 'true'
+  doc_url:
+    description: "the url of the docs site"
+    required: true
+  github_token:
+    description: 'the github token for publishing docs'
+    required: true
   test_docs:
     description: 'whether to test docstrings in this action.'
     required: false
     default: 'true'
-  github_token:
-    description: 'the github token for publishing docs'
-    required: true
-    default: ''
   python:
     description: "which python version to build docs with"
     required: false
@@ -33,10 +27,7 @@ inputs:
   use_latex:
     description: "install dependencies for LaTex"
     required: false
-    default: "false"
-  doc_url:
-    description: "the url of the docs site"
-    required: true
+    default: "false"  
 
 
 outputs:
@@ -47,7 +38,7 @@ outputs:
     description: "The version number if the commit is tag"
     value: ${{ steps.docs.outputs.current_version }}
   subfolder:
-    description: "The subfolder name where the docs are built to (if build_to_subfolder is set to true)"
+    description: "The subfolder name where the docs are built to"
     value: ${{ steps.docs.outputs.subfolder }}
 
 runs:
@@ -122,38 +113,10 @@ runs:
             fi;
         fi;
 
-        if [[ ${{ inputs.build_to_subfolder }} == "true" ]]; then
-          mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
-          echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
-          echo "Docs is built at ${{ inputs.dest }}/$FOLDER_NAME/"
-        else
-          mkdir -p ${{ inputs.dest }} && mv -T dist/docs ${{ inputs.dest }}
-          echo "Docs is built at ${{ inputs.dest }}"
-        fi;
+        mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
+        echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
+        echo "Docs is built at deploy/$FOLDER_NAME/"
 
-    # Check index.html and .nojekyll
-    - shell: bash -l {0}
-      run: |
-        echo check index.html and .nojekyll
-        cd ${{ inputs.dest }}
-        if [[ ! -f ".nojekyll" ]]; then
-          echo creating .nojekyll
-          > .nojekyll
-        fi
-
-        full_repo=${{ github.repository }}
-        repo=${full_repo#*/}
-
-        if [[ ! -f "index.html" ]]; then
-          echo creating index.html
-          echo '<meta http-equiv="refresh" content="0; url=/'$repo'/latest/">' > index.html
-        fi
-
-        if [[ ${{ steps.docs.outputs.commit_type }} == "tag" ]] && 
-          [[ ! "${{ steps.docs.outputs.current_version }}" =~ [0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)* ]]; then
-            echo update index.html to point at ${{ steps.docs.outputs.current_version }}
-            echo '<meta http-equiv="refresh" content="0; url=/'$repo'/${{ steps.docs.outputs.current_version }}/">' > index.html
-        fi
 
     # Deploy docs to ghpage
     - name: Deploy docs
@@ -168,18 +131,18 @@ runs:
   
     # Remove old patches and update the versions.json file
     - uses: actions/checkout@v4
-      # if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag'
       with:
         ref: gh-pages
     
     - uses: compas-dev/compas-actions.docversions@v3
-      # if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag'
       with:
         doc_url: ${{ inputs.doc_url }}
         only_keep_latest_patch: true
 
     - name: Update docs site
-      # if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag'
       uses: crazy-max/ghaction-github-pages@v2
       with:
         target_branch: gh-pages
