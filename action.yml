@@ -34,6 +34,9 @@ inputs:
     description: "install dependencies for LaTex"
     required: false
     default: "false"
+  doc_url:
+    description: "the url of the docs site"
+    required: true
 
 
 outputs:
@@ -50,7 +53,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # Install graphvis
     - shell: bash -l {0}
@@ -162,10 +165,25 @@ runs:
         keep_history: true
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      
-    # Update docs version list
-    - uses: compas-dev/compas-actions.docversions@v2
-      if: success() && steps.docs.outputs.commit_type == 'tag'
+  
+    # Remove old patches and update the versions.json file
+    - uses: actions/checkout@v4
+      # if: success() && steps.docs.outputs.commit_type == 'tag'
       with:
-        current_version: ${{ steps.docs.outputs.current_version }}
-        github_token: ${{ inputs.github_token }}
+        ref: gh-pages
+    
+    - uses: compas-dev/compas-actions.docversions@v3
+      # if: success() && steps.docs.outputs.commit_type == 'tag'
+      with:
+        doc_url: ${{ inputs.doc_url }}
+        only_keep_latest_patch: true
+
+    - name: Update docs site
+      # if: success() && steps.docs.outputs.commit_type == 'tag'
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: ./
+        keep_history: false
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
