@@ -3,8 +3,8 @@ description: 'Build docs for COMPAS or its plugins'
 
 inputs:
   doc_url:
-    description: "the url of the docs site"
-    required: true
+    description: "custom url of the docs site, otherwise default gh-pages url of the repo"
+    required: false
   github_token:
     description: 'the github token for publishing docs'
     required: true
