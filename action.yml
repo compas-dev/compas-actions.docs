@@ -87,7 +87,7 @@ runs:
 
     # Detect commit type and docs to corresponding folder
     - shell: bash -l {0}
-      id : docs
+      id: docs
       run: |
         # Get branch/tag/latest name from git
         GITHUB_REF_REGEX="tags/v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?(rc[0-9]{1,2})?|(pull/[0-9]+)|heads/main|heads/COMPAS-1\.x\.LTS"
@@ -113,7 +113,8 @@ runs:
             fi;
         fi;
 
-        mkdir -p deploy/$FOLDER_NAME && mv -T dist/docs deploy/$FOLDER_NAME/
+        mkdir -p deploy/$FOLDER_NAME
+        mv dist/docs/* deploy/$FOLDER_NAME/
         echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
         echo "Docs is built at deploy/$FOLDER_NAME/"
 
