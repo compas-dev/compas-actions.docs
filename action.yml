@@ -32,6 +32,10 @@ inputs:
     description: "which documentation generator to use (sphinx or mkdocs)"
     required: false
     default: "sphinx"
+  extras:
+    description: "comma-separated list of optional dependencies to install (e.g. dev,docs,mkdocs)"
+    required: false
+    default: "dev"
 
 
 outputs:
@@ -74,11 +78,12 @@ runs:
         fi
 
     # Build package
-    - uses: compas-dev/compas-actions.build@v4
+    - uses: compas-dev/compas-actions.build@mkdocs
       with:
         invoke_test: false
         use_conda: ${{ inputs.use_conda }}
         python: ${{ inputs.python }}
+        extras: ${{ inputs.extras }}
 
     # Test and generate docs
     - shell: bash -l {0}
