@@ -23,6 +23,7 @@ steps:
 5. `use_conda`: Whether to build docs with conda. (default: "false")
 6. `use_virtual_display`: Use virtual display on Linux when matplotlib is imported. (default: "false")
 7. `use_latex`: Install dependencies for LaTex. (default: "false")
+8. `generator`: Which documentation generator to use (sphinx or mkdocs). (default: "sphinx")
 
 ## Outputs
 1. `commit_type`: Type of the commit - main, pull, or tag.

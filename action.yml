@@ -28,6 +28,14 @@ inputs:
     description: "install dependencies for LaTex"
     required: false
     default: "false"  
+  generator:
+    description: "which documentation generator to use (sphinx or mkdocs)"
+    required: false
+    default: "sphinx"
+  extras:
+    description: "comma-separated list of optional dependencies to install (e.g. dev,docs,mkdocs)"
+    required: false
+    default: "dev"
 
 
 outputs:
@@ -70,11 +78,12 @@ runs:
         fi
 
     # Build package
-    - uses: compas-dev/compas-actions.build@v4
+    - uses: compas-dev/compas-actions.build@v5
       with:
         invoke_test: false
         use_conda: ${{ inputs.use_conda }}
         python: ${{ inputs.python }}
+        extras: ${{ inputs.extras }}
 
     # Test and generate docs
     - shell: bash -l {0}
@@ -112,16 +121,19 @@ runs:
 
             fi;
         fi;
+        
+        # Don't create deployment folder for mkdocs, mike handles it
+        if [[ ${{ inputs.generator }} != "mkdocs" ]]; then
+          mkdir -p deploy/$FOLDER_NAME
+          mv dist/docs/* deploy/$FOLDER_NAME/
+          echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
+          echo "Docs is built at deploy/$FOLDER_NAME/"
+        fi
 
-        mkdir -p deploy/$FOLDER_NAME
-        mv dist/docs/* deploy/$FOLDER_NAME/
-        echo "subfolder=$FOLDER_NAME" >> $GITHUB_OUTPUT
-        echo "Docs is built at deploy/$FOLDER_NAME/"
 
-
-    # Deploy docs to ghpage
+    # Deploy docs to ghpage (Sphinx)
     - name: Deploy docs
-      if: success() && steps.docs.outputs.commit_type != 'pull'
+      if: success() && steps.docs.outputs.commit_type != 'pull' && inputs.generator != 'mkdocs'
       uses: crazy-max/ghaction-github-pages@v2
       with:
         target_branch: gh-pages
@@ -129,21 +141,44 @@ runs:
         keep_history: true
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    # Deploy docs to ghpage (mkdocs)
+    - name: Configure Git Credentials
+      if: success() && steps.docs.outputs.commit_type != 'pull' && inputs.generator == 'mkdocs'
+      shell: bash -l {0}
+      run: |
+        git config user.name github-actions[bot]
+        git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+    - name: Deploy to GitHub Pages (mkdocs)
+      if: success() && steps.docs.outputs.commit_type != 'pull' && inputs.generator == 'mkdocs'
+      shell: bash -l {0}
+      run: |
+        git fetch origin gh-pages --depth=1
+        
+        VERSION_TAG="${{ steps.docs.outputs.current_version }}"
+        if [[ "${{ steps.docs.outputs.commit_type }}" == "main" ]]; then
+            # Deploy main as "latest"
+            mike deploy --push --update-aliases latest
+        elif [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
+             # Deploy version tag and update latest alias
+            mike deploy --push --update-aliases $VERSION_TAG latest
+        fi
   
     # Remove old patches and update the versions.json file
     - uses: actions/checkout@v4
-      if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag' && inputs.generator != 'mkdocs'
       with:
         ref: gh-pages
     
     - uses: compas-dev/compas-actions.docversions@v3
-      if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag' && inputs.generator != 'mkdocs'
       with:
         doc_url: ${{ inputs.doc_url }}
         only_keep_latest_patch: true
 
     - name: Update docs site
-      if: success() && steps.docs.outputs.commit_type == 'tag'
+      if: success() && steps.docs.outputs.commit_type == 'tag' && inputs.generator != 'mkdocs'
       uses: crazy-max/ghaction-github-pages@v2
       with:
         target_branch: gh-pages
