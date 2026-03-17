@@ -158,12 +158,9 @@ runs:
         
         VERSION_TAG="${{ steps.docs.outputs.current_version }}"
 
-        if [[ "${{ steps.docs.outputs.commit_type }}" == "main" ]]; then
-            # Deploy main as "latest"
+        if [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
+             # Deploy version tag and update latest alias
             mike deploy --push --update-aliases $VERSION_TAG latest
-        elif [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
-             # Deploy version tag and update stable alias
-            mike deploy --push --update-aliases $VERSION_TAG stable
         fi
   
     # Remove old patches and update the versions.json file
