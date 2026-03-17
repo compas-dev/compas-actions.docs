@@ -157,6 +157,7 @@ runs:
         git fetch origin gh-pages --depth=1
         
         VERSION_TAG="${{ steps.docs.outputs.current_version }}"
+        mike list
         if [[ "${{ steps.docs.outputs.commit_type }}" == "main" ]]; then
             # Deploy main as "latest"
             mike deploy --push --update-aliases latest
@@ -164,6 +165,7 @@ runs:
              # Deploy version tag and update latest alias
             mike deploy --push --update-aliases $VERSION_TAG latest
         fi
+        mike list
   
     # Remove old patches and update the versions.json file
     - uses: actions/checkout@v4
