@@ -157,10 +157,8 @@ runs:
         git fetch origin gh-pages --depth=1
         
         VERSION_TAG="${{ steps.docs.outputs.current_version }}"
-        if [[ "${{ steps.docs.outputs.commit_type }}" == "main" ]]; then
-            # Deploy main as "latest"
-            mike deploy --push --update-aliases latest
-        elif [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
+
+        if [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
              # Deploy version tag and update latest alias
             mike deploy --push --update-aliases $VERSION_TAG latest
         fi
