@@ -159,8 +159,8 @@ runs:
         VERSION_TAG="${{ steps.docs.outputs.current_version }}"
 
         if [[ "${{ steps.docs.outputs.commit_type }}" == "tag" ]]; then
-             # Deploy version tag and update latest alias
-            mike deploy --push --update-aliases $VERSION_TAG latest
+             # Deploy version tag and update latest alias, --set-default makes sure there's an index.html which points to latest
+            mike deploy $VERSION_TAG latest --push --update-aliases --set-default latest --allow-undefined
         fi
   
     # Remove old patches and update the versions.json file
